@@ -11,7 +11,9 @@
           (release) =>
             "0" <= release.name[0] &&
             release.name[0] <= "9" &&
-            !release.name.includes("Experimental("),
+            !release.name.includes("Experimental(") &&
+            release.name !==
+              "1.1.1 UI Scale" /*This one has a weirdly high number of downloads so we ignore it*/,
         )
 
       const names = data.map((release) => release.name)
