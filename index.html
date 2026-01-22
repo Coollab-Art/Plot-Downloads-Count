@@ -2,119 +2,125 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <canvas id="myChart" width="400" height="200"></canvas>
 <script>
-            fetch('https://api.github.com/repos/Coollab-Art/Coollab/releases')
-          .then(response => response.json())
-          .then(data => {
-
-              data = data.reverse()
-        .filter(release =>
-        '0' <= release.name[0] && release.name[0] <= '9'
-         && !release.name.includes("Experimental(")
+  fetch("https://api.github.com/repos/Coollab-Art/Coollab/releases")
+    .then((response) => response.json())
+    .then((data) => {
+      data = data
+        .reverse()
+        .filter(
+          (release) =>
+            "0" <= release.name[0] &&
+            release.name[0] <= "9" &&
+            !release.name.includes("Experimental("),
         )
 
-        const names = data.map(
-            release =>release.name
-        )
-        const dates = data.map(
-            release =>
-            {
-              const date = new Date(release.published_at);
+      const names = data.map((release) => release.name)
+      const dates = data.map((release) => {
+        const date = new Date(release.published_at)
 
-  const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
+        const months = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ]
 
-  const formatted = `${date.getUTCFullYear()} ${months[date.getUTCMonth()]} ${date.getUTCDate()}`;
+        const formatted = `${date.getUTCFullYear()} ${months[date.getUTCMonth()]} ${date.getUTCDate()}`
 
-            return  formatted
-            }
-        )
+        return formatted
+      })
 
-        const downloads_for_os = (os_names) => {
-      return data.map(release => {
+      const downloads_for_os = (os_names) => {
+        return data.map((release) => {
           let count = 0
-          for(asset of release.assets)
-        {
-          if (os_names.includes(asset.name) &&  asset.download_count)
-        {
-            count += asset.download_count
-          }
-        }
-        return count
-        })
-        }
-
-        const windows = downloads_for_os(["Coollab-Windows.zip","Coollab-Windows-WithDLLs.zip" ])
-        const linux = downloads_for_os(["Coollab.AppImage"])
-        const macos = downloads_for_os(["Coollab-MacOS.zip"])
-
-
-    const totals = windows.map((_, i) => windows[i] + linux[i] + macos[i]);
-
-
-    Chart.register(ChartDataLabels);
-
-          const ctx = document.getElementById('myChart').getContext('2d');
-          new Chart(ctx, {
-          type: 'bar',
-            data: {
-              labels: names,
-              datasets: [     {
-                label: 'Windows',
-                data: windows,
-                backgroundColor: '#0078D7'
-              },
-              {
-                label: 'Linux',
-                data: linux,
-                backgroundColor: '#3DDC84'
-              },
-              {
-                label: 'MacOS',
-                data: macos,
-                backgroundColor: '#FFD300'
-              },
-          ]
-            },
-          options: {
-            responsive: true,
-            scales: {
-              x: { stacked: true,
-          ticks: {
-
-        callback: function(value, index) {
-          return [names[index], dates[index]];
-        },
-            font: {
-              weight: 'bold'
+          for (asset of release.assets) {
+            if (os_names.includes(asset.name) && asset.download_count) {
+              count += asset.download_count
             }
-          } },
-              y: { stacked: true, beginAtZero: true }
-            },
-
-
-      plugins: {
-        datalabels: {
-          display(ctx) {
-            return ctx.datasetIndex === 2; // show label only once per bar (last dataset)
-          },
-          formatter(value, ctx) {
-            return totals[ctx.dataIndex];
-          },
-          anchor: 'end',
-          align: 'start',
-
-      offset: -22,
-          color: 'black',
-          font: { weight: 'bold', size: 12 }
-        }
+          }
+          return count
+        })
       }
+
+      const windows = downloads_for_os([
+        "Coollab-Windows.zip",
+        "Coollab-Windows-WithDLLs.zip",
+      ])
+      const linux = downloads_for_os(["Coollab.AppImage"])
+      const macos = downloads_for_os(["Coollab-MacOS.zip"])
+
+      const totals = windows.map((_, i) => windows[i] + linux[i] + macos[i])
+
+      Chart.register(ChartDataLabels)
+
+      const ctx = document.getElementById("myChart").getContext("2d")
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: names,
+          datasets: [
+            {
+              label: "Windows",
+              data: windows,
+              backgroundColor: "#0078D7",
+            },
+            {
+              label: "Linux",
+              data: linux,
+              backgroundColor: "#3DDC84",
+            },
+            {
+              label: "MacOS",
+              data: macos,
+              backgroundColor: "#FFD300",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              stacked: true,
+              ticks: {
+                callback: function (value, index) {
+                  return [names[index], dates[index]]
+                },
+                font: {
+                  weight: "bold",
+                },
+              },
+            },
+            y: { stacked: true, beginAtZero: true },
           },
 
-          });
-          })
-          .catch(error => {
-            console.error('Error:', error);
-          });
+          plugins: {
+            datalabels: {
+              display(ctx) {
+                return ctx.datasetIndex === 2 // show label only once per bar (last dataset)
+              },
+              formatter(value, ctx) {
+                return totals[ctx.dataIndex]
+              },
+              anchor: "end",
+              align: "start",
+
+              offset: -22,
+              color: "black",
+              font: { weight: "bold", size: 12 },
+            },
+          },
+        },
+      })
+    })
+    .catch((error) => {
+      console.error("Error:", error)
+    })
 </script>
