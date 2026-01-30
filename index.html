@@ -2,6 +2,11 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <canvas id="myChart" width="400" height="200"></canvas>
 <script>
+  function daysBetween(date1, date2) {
+    const MS_PER_DAY = 24 * 60 * 60 * 1000
+    return (date2.getTime() - date1.getTime()) / MS_PER_DAY
+  }
+
   fetch("https://api.github.com/repos/Coollab-Art/Coollab/releases")
     .then((response) => response.json())
     .then((data) => {
@@ -40,8 +45,15 @@
         return formatted
       })
 
+      const durationOfRelease = data.map((_, i) => {
+        const current = new Date(data[i].published_at)
+        const next =
+          i + 1 < data.length ? new Date(data[i + 1].published_at) : new Date()
+        return daysBetween(current, next)
+      })
+
       const downloads_for_os = (os_names) => {
-        return data.map((release) => {
+        return data.map((release, i) => {
           let count = 0
           for (asset of release.assets) {
             if (os_names.includes(asset.name) && asset.download_count) {
@@ -109,13 +121,14 @@
                 return ctx.datasetIndex === 2 // show label only once per bar (last dataset)
               },
               formatter(value, ctx) {
-                return totals[ctx.dataIndex]
+                return `${totals[ctx.dataIndex]}\n(in ${durationOfRelease[ctx.dataIndex].toFixed(1)} days)`
               },
               anchor: "end",
               align: "start",
 
-              offset: -22,
+              offset: -32,
               color: "black",
+              textAlign: "center",
               font: { weight: "bold", size: 12 },
             },
           },
